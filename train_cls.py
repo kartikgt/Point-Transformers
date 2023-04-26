@@ -25,7 +25,7 @@ def test(model, loader, num_class=40):
     for j, data in tqdm(enumerate(loader), total=len(loader)):
         points, target = data
         target = target[:, 0]
-        points, target = points.cuda(), target.cuda()
+        # points, target = points.cuda(), target.cuda()
         classifier = model.eval()
         pred = classifier(points)
         pred_choice = pred.data.max(1)[1]
@@ -49,7 +49,8 @@ def main(args):
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
     logger = logging.getLogger(__name__)
 
-    print(args.pretty())
+    # print(args)
+    # print(args.pretty())
 
     '''DATA LOADING'''
     logger.info('Load dataset ...')
@@ -65,7 +66,7 @@ def main(args):
     args.input_dim = 6 if args.normal else 3
     shutil.copy(hydra.utils.to_absolute_path('models/{}/model.py'.format(args.model.name)), '.')
 
-    classifier = getattr(importlib.import_module('models.{}.model'.format(args.model.name)), 'PointTransformerCls')(args).cuda()
+    classifier = getattr(importlib.import_module('models.{}.model'.format(args.model.name)), 'PointTransformerCls')(args)
     criterion = torch.nn.CrossEntropyLoss()
 
     try:
@@ -112,7 +113,7 @@ def main(args):
             points = torch.Tensor(points)
             target = target[:, 0]
 
-            points, target = points.cuda(), target.cuda()
+            points, target = points, target
             optimizer.zero_grad()
 
             pred = classifier(points)
